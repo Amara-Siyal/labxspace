@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Labspace – University Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--g:#215e4f;--gd:#1b4d41;--gl:#e6f2ec;--bg:#f5f8f6;--tx:#17302a;--mut:#7e908a;--bd:#e3ebe7;--or:#b9732a;--orl:#fdf0e2;--bl:#4c6fa5;--bll:#e8eef8;--rd:#c0392b;--rdl:#fbe9e6}
+*{box-sizing:border-box}
+body{margin:0;font-family:"DM Sans",Arial,sans-serif;background:var(--bg);color:var(--tx);font-size:14px}
+h1,h2,h3{font-family:"Plus Jakarta Sans","DM Sans",sans-serif;font-weight:500;letter-spacing:-.03em;margin:0}
+button{font:inherit;cursor:pointer}
+svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.hide{display:none!important}
+/* login */
+#login{display:grid;grid-template-columns:1fr 1fr;min-height:100vh}
+.lf{padding:70px 70px;display:flex;flex-direction:column;justify-content:center;max-width:620px;width:100%;margin:auto}
+.lf h1{font-size:44px}.sub{color:var(--mut);margin:10px 0 26px}
+label{display:block;font-weight:600;font-size:13px;margin:16px 0 6px;color:#3d544d}
+input,select{width:100%;padding:13px 14px;border:1px solid var(--bd);border-radius:10px;font:inherit;background:#fff;color:var(--tx)}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--g);outline-offset:1px}
+.btn{background:var(--g);color:#fff;border:0;border-radius:10px;padding:12px 18px;font-weight:600;display:inline-flex;align-items:center;gap:8px;justify-content:center}
+.btn:hover{background:var(--gd)}.btn.full{width:100%;justify-content:space-between;margin-top:22px;padding:15px 20px}
+.btn.o{background:#fff;color:var(--g);border:1px solid var(--bd)}.btn.o:hover{background:var(--gl)}
+.btn.sm{padding:9px 14px;font-size:13px}
+.or{text-align:center;color:var(--mut);font-size:12px;margin:24px 0 14px}
+.demo{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.demo button{display:flex;align-items:center;gap:10px;padding:14px;background:#fff;border:1px solid var(--bd);border-radius:10px;text-align:left;color:var(--g)}
+.demo b{display:block;color:var(--tx)}.demo small{color:var(--mut);font-size:11px}
+.lr{background:var(--g);color:#fff;padding:70px;display:flex;flex-direction:column;justify-content:center;gap:22px}
+.lr h2{font-size:52px;line-height:1.05;color:#fff}.lr p{color:#cde5da;max-width:420px}
+.lr .mini{background:#fff;color:var(--tx);border-radius:14px;padding:18px;display:flex;align-items:center;gap:14px;max-width:520px}
+.lr small{color:#9fc4b5}
+/* app */
+#app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+aside{background:#fff;border-right:1px solid var(--bd);padding:26px 16px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.logo{display:flex;gap:12px;align-items:center;padding:0 8px 28px}
+.logo i{background:var(--g);color:#fff;width:44px;height:44px;border-radius:12px;display:grid;place-items:center}
+.logo b{font-size:20px;font-family:"Plus Jakarta Sans",sans-serif;display:block;line-height:1.1}.logo small{font-size:10px;letter-spacing:.14em;color:var(--mut)}
+.ws{font-size:11px;letter-spacing:.14em;color:var(--mut);padding:0 12px 10px}
+nav button{width:100%;display:flex;align-items:center;gap:12px;padding:13px 14px;border:0;background:none;border-radius:12px;color:#5c716a;font-weight:500;text-align:left;margin-bottom:2px}
+nav button.on{background:var(--gl);color:var(--g);font-weight:600}
+nav .dot{margin-left:auto;width:7px;height:7px;border-radius:50%;background:#3aa573}
+.me{margin-top:auto;border-top:1px solid var(--bd);padding-top:14px}
+.av{width:44px;height:44px;border-radius:50%;background:#d6eadf;color:var(--g);display:grid;place-items:center;font-weight:700;flex:none}
+.who{display:flex;gap:12px;align-items:center;padding:6px 8px}.who small{color:var(--mut)}
+main{padding:34px 42px;min-width:0}
+.eb{font-size:11px;letter-spacing:.14em;font-weight:700;color:var(--g);text-transform:uppercase;margin-bottom:10px}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.head h1{font-size:38px}
+.card{background:#fff;border:1px solid var(--bd);border-radius:16px;padding:22px}
+.banner{background:var(--gl);border:1px solid #d2e7db;border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:16px;margin-bottom:18px}
+.ic{width:42px;height:42px;border-radius:11px;background:var(--gl);color:var(--g);display:grid;place-items:center;flex:none}
+.banner .ic{background:#d3e8dc}.banner b{flex:1}.banner a{color:var(--g);font-weight:600;cursor:pointer;display:flex;gap:6px;align-items:center}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:18px}
+.stat b{display:block;font-size:30px;font-family:"Plus Jakarta Sans",sans-serif;font-weight:500;margin:14px 0 2px}.stat span{color:var(--mut)}
+.row2{display:grid;grid-template-columns:1.7fr 1fr;gap:18px;margin-bottom:22px}
+.dark{background:var(--g);color:#fff;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:12px;justify-content:center}
+.dark .ic{background:#3b7767;color:#fff}.dark h3{font-size:22px}.dark p{color:#cde5da;margin:0}
+.dark .btn{background:#fff;color:var(--g);align-self:flex-start}
+.sec{display:flex;justify-content:space-between;align-items:center;margin:26px 0 14px}.sec h2{font-size:22px}.sec h2 small{color:var(--mut);font-size:14px}
+.link{color:var(--g);font-weight:600;cursor:pointer;display:inline-flex;gap:6px;align-items:center;background:none;border:0}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:7px;background:var(--gl);color:var(--g)}
+.pill:before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+.pill.or{background:var(--orl);color:var(--or)}.pill.bl{background:var(--bll);color:var(--bl)}.pill.rd{background:var(--rdl);color:var(--rd)}
+.ub{display:flex;gap:18px;align-items:flex-start}.ub .ic{width:60px;height:60px;border-radius:14px}
+.ub h3{font-size:20px;margin:8px 0 4px}.meta{display:flex;gap:18px;color:var(--mut);flex-wrap:wrap;margin-top:10px}.meta span{display:flex;gap:6px;align-items:center}
+.grid3{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.bar{height:7px;background:#e8efeb;border-radius:9px;overflow:hidden;margin:12px 0 8px}.bar i{display:block;height:100%;background:#5db88a;border-radius:9px}
+.bar.or i{background:#e0a35c}.bar.rd i{background:#d9695c}
+.lv h3{font-size:16px;margin:8px 0 2px}.lv small{color:var(--mut)}
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;letter-spacing:.1em;color:var(--mut);text-align:left;padding:14px;background:#f5f8f6;font-weight:600}
+th:first-child{border-radius:10px 0 0 10px}th:last-child{border-radius:0 10px 10px 0}
+td{padding:16px 14px;border-bottom:1px solid var(--bd);vertical-align:top}tr:last-child td{border:0}
+td small{display:block;color:var(--mut);margin-top:3px}
+.wl .q{float:right}.steps{display:flex;gap:6px;margin:14px 0 8px}.steps i{flex:1;height:5px;border-radius:5px;background:#e3ebe7}.steps i.f{background:#5db88a}
+.filters{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 18px}.filters label{margin:0 0 6px}
+.rec{cursor:pointer}.rec:hover{border-color:var(--g)}.rec .top{display:flex;justify-content:space-between;align-items:center;color:var(--g);font-weight:700}
+.lab{display:flex;align-items:center;gap:18px;margin-bottom:12px;flex-wrap:wrap}.lab>div:nth-child(2){flex:1;min-width:220px}
+.lab h3{font-size:18px;display:inline;margin-right:8px}.lab p{margin:6px 0;color:var(--mut)}
+.tabs{display:flex;gap:26px;border-bottom:1px solid var(--bd);margin-bottom:18px}
+.tabs button{background:none;border:0;padding:10px 0;color:var(--mut);font-weight:600;border-bottom:2px solid transparent;margin-bottom:-1px}.tabs button.on{color:var(--g);border-color:var(--g)}
+.note{display:flex;gap:16px;padding:18px 0;border-bottom:1px solid var(--bd)}.note:last-child{border:0}.note small{color:var(--mut)}.note.new b:after{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#3aa573;margin-left:8px}
+.prow{display:flex;justify-content:space-between;padding:18px 0;border-top:1px solid var(--bd)}.prow span{color:var(--mut)}
+#modal{position:fixed;inset:0;background:#10241d88;display:grid;place-items:center;padding:20px;z-index:20}
+.mb{background:#fff;border-radius:18px;padding:26px;width:560px;max-width:100%;max-height:92vh;overflow:auto}
+.mb h2{font-size:24px;margin-bottom:4px}.fg{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}.fg label{margin:12px 0 5px}
+.res{margin-top:16px;border-radius:12px;padding:14px;background:var(--bg)}.res ul{padding-left:18px;margin:8px 0}
+.res.ok{background:var(--gl);color:var(--g)}.res.bad{background:var(--rdl)}
+#toast{position:fixed;bottom:24px;right:24px;background:var(--gd);color:#fff;padding:14px 18px;border-radius:12px;z-index:30;max-width:340px;box-shadow:0 8px 24px #0003}
+@media(max-width:900px){#login{grid-template-columns:1fr}.lr{display:none}.lf{padding:40px 24px}
+#app{grid-template-columns:1fr}aside{position:static;height:auto;flex-direction:row;flex-wrap:wrap;padding:12px}.ws,.me,.logo small{display:none}.logo{padding:0 8px 0 0}
+nav{display:flex;overflow:auto}nav button{width:auto;white-space:nowrap}main{padding:22px 16px}.stats{grid-template-columns:1fr 1fr}.row2,.filters{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="lf">
+    <h1 id="lh">Welcome back</h1><p class="sub">Sign in to book a lab or manage your campus spaces.</p>
+    <div id="suF" class="hide"><label>Full name</label><input id="lName" placeholder="e.g. Sara Khan"><label>I am a</label><select id="lRole"><option value="student">Student</option><option value="faculty">Faculty</option></select></div>
+    <label>Email address</label><input id="lEmail" value="student@uni.edu">
+    <label>Password</label><input id="lPass" type="password" value="password12">
+    <button class="btn full" onclick="authSubmit()"><span id="lbtn">Sign in</span> <span id="ar1"></span></button>
+    <div class="or" style="margin:16px 0 0"><span id="swTxt">New here?</span> <a class="link" id="swLn" onclick="setMode()">Create an account</a></div>
+    <div class="or">Or try a demo account</div>
+    <div class="demo">
+      <button onclick="signIn('student')"><span id="iu"></span><span><b>Student</b><small>Book labs and equipment</small></span></button>
+      <button onclick="signIn('staff')"><span id="if"></span><span><b>Staff / Admin</b><small>Manage requests and labs</small></span></button>
+      <button onclick="signIn('faculty')" style="grid-column:1/3"><span id="ifa"></span><span><b>Faculty</b><small>Priority booking and approvals</small></span></button>
+    </div>
+  </div>
+  <div class="lr">
+    <small style="letter-spacing:.14em;font-weight:700">YOUR CAMPUS, CONNECTED</small>
+    <h2>Make room for your next idea.</h2>
+    <p>Find the right lab, reserve the equipment you need, and get back to what matters.</p>
+    <div class="mini"><span class="ic" id="if2"></span><div style="flex:1"><b>Embedded Systems Lab</b><br><small style="color:var(--mut)">Engineering Block A · 24 seats</small></div><span class="pill">Available</span></div>
+    <small style="margin-top:60px">Northfield University · Campus resources made simple</small>
+  </div>
+</div>
+
+<div id="app" class="hide">
+  <aside>
+    <div class="logo"><i id="ilogo"></i><div><b>Labspace</b><small>UNIVERSITY PORTAL</small></div></div>
+    <div class="ws">WORKSPACE</div>
+    <nav id="nav"></nav>
+    <div class="me"><div class="who"><div class="av" id="av"></div><div><b id="uname"></b><br><small id="urole"></small></div></div>
+    <nav><button onclick="signOut()"><span id="iout"></span>Log out</button></nav></div>
+  </aside>
+  <main id="main"></main>
+</div>
+<div id="modal" class="hide" onclick="if(event.target===this)closeModal()"><div class="mb" id="mbody"></div></div>
+<div id="toast" class="hide"></div>
+
+<script>
+/* ---------- ICONS ---------- */
+const P={flask:'<path d="M9 3h6M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2h12.4a1.5 1.5 0 0 0 1.3-2L14 9V3"/>',grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',search:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',out:'<path d="M9 21H5V3h4M16 17l5-5-5-5M21 12H9"/>',arr:'<path d="M5 12h14M13 6l6 6-6 6"/>',check:'<path d="m5 12 5 5 9-10"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',box:'<path d="M21 8 12 3 3 8v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>',users:'<circle cx="9" cy="8" r="3.5"/><path d="M2 20a7 7 0 0 1 14 0M16 4.5a3.5 3.5 0 0 1 0 7M18 20a6 6 0 0 0-3-5"/>',spark:'<path d="M12 3l2 6 6 3-6 3-2 6-2-6-6-3 6-3z"/>',plus:'<path d="M12 5v14M5 12h14"/>'};
+const ic=n=>`<svg viewBox="0 0 24 24">${P[n]}</svg>`;
+const $=id=>document.getElementById(id);
+["ar1:arr","iu:user","if:flask","if2:flask","ilogo:flask","iout:out","ifa:users"].forEach(s=>{const[a,b]=s.split(":");$(a).innerHTML=ic(b)});
+
+/* ---------- DATA (our "database") ---------- */
+const dstr=o=>{const d=new Date();d.setDate(d.getDate()+o);return d.toISOString().slice(0,10)};
+const today=dstr(0),tomorrow=dstr(1);
+const ITEMS=["Arduino","Oscilloscope","PC","Projector","Router","Switch","FPGA"];
+const labs=[
+ {id:1,name:"Embedded Systems Lab",dept:"Electrical Engineering",loc:"Engineering Block A · Floor 2",capacity:24,equipment:{Arduino:20,Oscilloscope:10,Projector:1}},
+ {id:2,name:"Electronics Lab",dept:"Electrical Engineering",loc:"Engineering Block A · Floor 1",capacity:32,equipment:{Oscilloscope:15,Arduino:10}},
+ {id:3,name:"Computer Lab",dept:"Computer Science",loc:"Technology Center · Floor 3",capacity:40,equipment:{PC:40,Projector:2}},
+ {id:4,name:"Digital Logic Lab",dept:"Electrical Engineering",loc:"Engineering Block B · Floor 2",capacity:20,equipment:{FPGA:12,Oscilloscope:8}},
+ {id:5,name:"Networking Lab",dept:"Computer Science",loc:"Technology Center · Floor 2",capacity:30,equipment:{Router:10,Switch:10,PC:10}}
+];
+let nextId=2050;
+const bookings=[
+ {id:"BK-2020",lab:1,date:today,start:13,end:15,people:24,items:{Arduino:8},purpose:"Class session",status:"approved",mine:false},
+ {id:"BK-2021",lab:3,date:today,start:9,end:17,people:20,items:{},purpose:"Exam prep",status:"approved",mine:false},
+ {id:"BK-2022",lab:5,date:today,start:10,end:12,people:5,items:{Router:4},purpose:"Network demo",status:"approved",mine:false},
+ {id:"BK-2048",lab:1,date:tomorrow,start:9,end:11,people:8,items:{Arduino:4},purpose:"IoT prototype development",status:"approved",mine:true},
+ {id:"BK-2041",lab:3,date:tomorrow,start:14,end:16,people:18,items:{PC:18},purpose:"Machine learning workshop",status:"pending",mine:true},
+ {id:"BK-2032",lab:2,date:dstr(-3),start:10,end:12,people:12,items:{Oscilloscope:6},purpose:"Circuit design practice",status:"completed",mine:true}
+];
+const maintenance=[{lab:2,date:today,start:8,end:10}];
+const waitlist=[];
+const notes=[
+ {ic:"check",t:"Booking approved",m:"Your Embedded Systems Lab booking has been approved.",w:"2 hours ago",n:true},
+ {ic:"cal",t:"Upcoming lab session",m:"Embedded Systems Lab is booked for tomorrow.",w:"Yesterday",n:false},
+ {ic:"box",t:"Equipment ready",m:"Arduino Kits are ready for your session.",w:"2 days ago",n:false}
+];
+const users={student:{name:"Alex Chen",ini:"AC",role:"Student",email:"alex.chen@northfield.edu",dept:"Computer Science",uid:"STU-20241082"},
+ staff:{name:"Dr. Sam Rivera",ini:"SR",role:"Staff / Admin",email:"s.rivera@northfield.edu",dept:"Engineering",uid:"STF-10377"}};
+let user=null,page="dashboard",tab="all",liveHour=14;
+let F={q:"",date:today,start:13,end:15,people:8,dept:"",item:"",qty:0,only:false};
+let lastRequest=null,pending=null;
+
+/* ---------- BACKEND LOGIC (from original code) ---------- */
+function overlaps(s1,e1,s2,e2){return s1<e2&&s2<e1}
+const labById=id=>labs.find(l=>l.id===id);
+const labName=id=>labById(id).name;
+function peopleInLab(labId,hour,date=today){let t=0;bookings.forEach(b=>{if(b.lab===labId&&b.date===date&&live(b)&&hour>=b.start&&hour<b.end)t+=b.people});return t}
+function busyPeople(labId,date,s,e){let t=0;bookings.forEach(b=>{if(b.lab===labId&&b.date===date&&live(b)&&overlaps(s,e,b.start,b.end))t+=b.people});return t}
+function findProblems(labId,date,start,end,people,item,qty){
+  const lab=labById(labId),problems=[];
+  if(end<=start){problems.push("End time must be after start time.");return problems}
+  if(end-start>RULES.maxHours&&!(user&&user.role==="Faculty"))problems.push(`Maximum booking duration is ${RULES.maxHours} hours.`);
+  if(item&&qty>RULES.maxQty)problems.push(`Maximum ${RULES.maxQty} equipment units per booking.`);
+  if(date<today)problems.push("You cannot book a past date.");
+  if(date>dstr(RULES.advanceDays))problems.push(`Bookings open up to ${RULES.advanceDays} days ahead.`);
+  if(user&&user.role!=="Staff / Admin"&&lateReturns>=RULES.maxLate)problems.push("Booking restricted after repeated late returns. Contact lab staff.");
+  maintenance.forEach(m=>{if(m.lab===labId&&m.date===date&&overlaps(start,end,m.start,m.end))problems.push(`${lab.name} is under maintenance ${fh(m.start)}–${fh(m.end)}.`)});
+  let peopleBusy=0,itemBusy=0;
+  bookings.forEach(b=>{if(b.lab===labId&&b.date===date&&live(b)&&overlaps(start,end,b.start,b.end)){peopleBusy+=b.people;if(item&&b.items[item])itemBusy+=b.items[item]}});
+  if(peopleBusy+people>lab.capacity)problems.push(`Capacity problem: ${Math.max(0,lab.capacity-peopleBusy)} seats free, you need ${people}.`);
+  if(item&&qty>0){const total=lab.equipment[item]||0;
+    if(total===0)problems.push(`${lab.name} has no ${item}.`);
+    else if(eqMaint[labId+"|"+item])problems.push(`${item} in ${lab.name} is under maintenance.`);
+    else if(qty>total-itemBusy-(faulty[labId+"|"+item]||0))problems.push(`Only ${Math.max(0,total-itemBusy-(faulty[labId+"|"+item]||0))} ${item} available, you asked for ${qty}.`)}
+  return problems;
+}
+function matchScore(lab,people){const wasted=Math.max(0,(lab.capacity-people)/lab.capacity);return Math.round(100-wasted*40)}
+function checkWaitlist(){
+  for(let i=waitlist.length-1;i>=0;i--){const w=waitlist[i];
+    if(!findProblems(w.lab,w.date,w.start,w.end,w.people,w.item,w.qty).length){
+      notes.unshift({ic:"bell",t:"Waitlist slot available",m:`${labName(w.lab)} is now free ${fh(w.start)}–${fh(w.end)}. Book it before someone else does.`,w:"Just now",n:true});
+      toast(`🔔 ${labName(w.lab)} is now free ${fh(w.start)}–${fh(w.end)}`);waitlist.splice(i,1)}}
+}
+
+/* ---------- HELPERS ---------- */
+const fh=h=>`${h%12||12}:00 ${h<12?"AM":"PM"}`;
+const fd=d=>new Date(d+"T00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+const hours=(sel)=>{let h="";for(let i=8;i<=18;i++)h+=`<option value="${i}" ${i===sel?"selected":""}>${fh(i)}</option>`;return h};
+const itemOpts=(sel)=>`<option value="">Any equipment</option>`+ITEMS.map(i=>`<option ${i===sel?"selected":""}>${i}</option>`).join("");
+const pill=s=>`<span class="pill ${{approved:"",pending:"or",completed:"bl",rejected:"rd",cancelled:"rd"}[s]}">${s[0].toUpperCase()+s.slice(1)}</span>`;
+function toast(m){const t=$("toast");t.textContent=m;t.classList.remove("hide");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.add("hide"),4000)}
+const mine=()=>bookings.filter(b=>b.mine);
+const eqText=l=>Object.keys(l.equipment).join(", ");
+
+/* ---------- AUTH + NAV ---------- */
+function signIn(r){user=users[r];$("login").classList.add("hide");$("app").classList.remove("hide");
+  $("av").textContent=user.ini;$("uname").textContent=user.name;$("urole").textContent=user.role;go("dashboard")}
+function signOut(){$("app").classList.add("hide");$("login").classList.remove("hide")}
+function go(p){page=p;
+  const D=["dashboard","grid","Dashboard"],N=["notes","bell","Notifications"],Pr=["profile","user","Profile"],E=["equip","box","Equipment"];
+  const items=user.role!=="Staff / Admin"?[D,["find","search","Find a Lab"],["bookings","cal","My Bookings"],E,N,Pr]:[D,["req","check","Requests"],["issue","clock","Issue & Return"],E,["an","spark","Analytics"],["labs","flask","Labs & Rules"],N,Pr];
+  const unread=notes.some(n=>n.n);
+  $("nav").innerHTML=items.map(([k,i,l])=>`<button class="${k===p?"on":""}" onclick="go('${k}')">${ic(i)}${l}${k==="notes"&&unread?'<span class="dot"></span>':""}</button>`).join("");
+  ({dashboard:rDash,find:rFind,bookings:rBook,notes:rNotes,profile:rProf,req:rReq,issue:rIssue,equip:rEq,an:rAn,labs:rLabs})[p]();scrollTo(0,0)}
+
+/* ---------- DASHBOARD ---------- */
+function rDash(){
+  const m=mine(),act=m.filter(b=>live(b));
+  const up=[...act].sort((a,b)=>a.date.localeCompare(b.date)||a.start-b.start)[0];
+  const eq=act.reduce((s,b)=>s+Object.values(b.items).reduce((x,y)=>x+y,0),0);
+  const n2=x=>String(x).padStart(2,"0");
+  const stat=(i,v,l)=>`<div class="card stat"><div class="ic">${ic(i)}</div><b>${n2(v)}</b><span>${l}</span></div>`;
+  const rows=[...m].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  $("main").innerHTML=`
+  <div class="head"><div><div class="eb">${user.role} dashboard</div><h1>Welcome back, ${user.name.split(" ")[user.role!=="Staff / Admin"?0:1]}</h1><p class="sub" style="margin:8px 0 0">Here's a quick look at your lab bookings.</p></div>
+  <div style="display:flex;gap:10px"><button class="btn o" onclick="go('find')">Browse labs</button><button class="btn" onclick="go('find')">${ic("spark")}Find Me a Lab</button></div></div>
+  <div class="banner"><div class="ic">${ic("spark")}</div><div><div class="eb" style="margin:0 0 4px;font-size:10px">SmartMatch assistant</div><b>Find the right lab, equipment and time — instantly.</b></div><a onclick="go('find')">Get matched ${ic("arr")}</a></div>
+  <div class="stats">${stat("cal",act.length,"Active bookings")}${stat("clock",m.filter(b=>b.status==="pending").length,"Pending requests")}${stat("check",m.filter(b=>["approved","reserved","in_use"].includes(b.status)).length,"Approved bookings")}${stat("box",eq,"Equipment issued")}</div>
+  <div class="row2"><div class="card"><div class="sec" style="margin-top:0"><h2 style="font-size:20px">Upcoming booking</h2><button class="link" onclick="go('bookings')">View all ${ic("arr")}</button></div>
+   ${up?`<div class="ub"><div class="ic">${ic("flask")}</div><div>${pillB(up)}<h3>${labName(up.lab)}</h3><span style="color:var(--mut)">${up.purpose}</span><div class="meta"><span>${ic("cal")}${fd(up.date)}</span><span>${ic("clock")}${fh(up.start)} – ${fh(up.end)}</span></div></div></div>`:`<p class="sub">No upcoming bookings. Find a lab to get started.</p>`}</div>
+   <div class="dark"><div class="ic">${ic("flask")}</div><h3>Need a space to create?</h3><p>Explore available labs and find the right equipment for your project.</p><button class="btn" onclick="go('find')">Explore labs ${ic("arr")}</button></div></div>
+
+  <div class="sec" style="margin-top:0"><h2>Live lab availability</h2><div style="width:200px"><select onchange="liveHour=+this.value;liveCards()">${hours(liveHour)}</select></div></div>
+  <div class="grid3" id="live"></div>
+  <div class="sec"><div><div class="eb" style="margin-bottom:4px">SmartMatch</div><h2>Smart Waitlist <small>(${waitlist.length})</small></h2></div></div>
+  <div class="grid3" id="wl"></div>
+  <div class="sec"><h2>Lab utilization</h2><span style="color:var(--mut)">Which lab is used most</span></div>
+  <div class="card" id="chart"></div>
+  <div class="card" style="margin-top:22px"><div class="sec" style="margin-top:0"><h2 style="font-size:20px">Recent activity</h2><button class="link" onclick="go('bookings')">All bookings ${ic("arr")}</button></div>${bTable(rows)}</div>`;
+  liveCards();drawChart();renderWL();
+}
+function liveCards(){
+  $("live").innerHTML=labs.map(l=>{const used=peopleInLab(l.id,liveHour),pc=Math.min(100,Math.round(used/l.capacity*100));
+    const mt=maintenance.some(m=>m.lab===l.id&&m.date===today&&liveHour>=m.start&&liveHour<m.end);
+    let c="",t="Free",p="";if(mt){c="bl";t="Maintenance";p=" bl"}else if(pc>=100){c="rd";t="Fully occupied";p=" rd"}else if(pc>0){c="or";t="Partly used";p=" or"}
+    return `<div class="card lv"><span class="pill${p}">${t}</span><h3>${l.name}</h3><small>${used} / ${l.capacity} seats · ${pc}%</small><div class="bar ${c}"><i style="width:${pc}%"></i></div></div>`}).join("")}
+function drawChart(){
+  const d=labs.map(l=>({n:l.name,h:bookings.filter(b=>b.lab===l.id&&live(b)).reduce((s,b)=>s+b.end-b.start,0)}));
+  const mx=Math.max(...d.map(x=>x.h),1),mn=Math.min(...d.map(x=>x.h));
+  $("chart").innerHTML=d.map(x=>`<div style="margin:10px 0"><b>${x.n}</b> <span style="color:var(--mut)">– ${x.h} booked hours</span> ${x.h===mx?'<span class="pill">Most used</span>':x.h===mn?'<span class="pill bl">Underused</span>':""}<div class="bar" style="height:10px"><i style="width:${x.h/mx*100}%"></i></div></div>`).join("")}
+function renderWL(){const el=$("wl");if(!el)return;
+  el.innerHTML=waitlist.length?waitlist.map((w,i)=>`<div class="card wl"><span class="pill">Smart waitlist</span><span class="pill or q">#${i+1} in queue</span><h3 style="font-size:20px;margin:14px 0 8px">${labName(w.lab)}</h3><div class="meta" style="flex-direction:column;gap:6px;margin:0"><span>${ic("cal")}${fd(w.date)} · ${fh(w.start)}–${fh(w.end)}</span><span>${ic("box")}${w.item||"No equipment"} · in-app</span></div><div class="steps">${[0,1,2,3,4].map(k=>`<i class="${k<2?"f":""}"></i>`).join("")}</div><div style="display:flex;justify-content:space-between;align-items:center"><small style="color:var(--mut)">Estimated wait: 1–2 days</small><button class="link" onclick="waitlist.splice(${i},1);go('dashboard')">Leave waitlist</button></div></div>`).join(""):`<div class="card" style="color:var(--mut)">Nobody is waiting. When a slot you want is taken, join the waitlist and we'll alert you when it frees up.</div>`}
+
+/* ---------- BOOKINGS ---------- */
+function bTable(rows,actions){
+  if(!rows.length)return `<p class="sub">No bookings here yet.</p>`;
+  return `<div style="overflow-x:auto"><table><tr><th>LAB / PURPOSE</th><th>DATE &amp; TIME</th><th>PEOPLE</th><th>STATUS</th>${actions?"<th></th>":""}</tr>`+rows.map(b=>`<tr><td><b>${labName(b.lab)}</b><small>${b.purpose} · ${b.id}</small></td><td>${fd(b.date)}<small>${fh(b.start)} – ${fh(b.end)}</small></td><td>${b.people}</td><td>${pillB(b)}</td>${actions?`<td style="white-space:nowrap">${user.role==="Staff / Admin"&&b.status==="pending"?`<button class="btn sm" onclick="approve('${b.id}')">Approve</button> `:""}${b.status==="approved"?`<button class="btn sm" onclick="setSt('${b.id}','reserved')">Confirm</button> `:""}${b.status==="draft"?`<button class="btn sm" onclick="setSt('${b.id}','pending')">Submit</button> <button class="btn o sm" onclick="cancelBooking('${b.id}')">Discard</button>`:""}${["approved","reserved"].includes(b.status)?`<button class="btn o sm" onclick="openPass('${b.id}')">QR / Calendar</button> `:""}${live(b)?`<button class="btn o sm" onclick="cancelBooking('${b.id}')">Cancel</button>`:""}</td>`:""}</tr>`).join("")+`</table></div>`}
+function rBook(){
+  const rows=mine().filter(b=>tab==="all"||b.status===tab||(tab==="approved"&&["reserved","in_use"].includes(b.status))).sort((a,b)=>b.date.localeCompare(a.date));
+  $("main").innerHTML=`<div class="head"><div><div class="eb">Your schedule</div><h1>My bookings</h1><p class="sub" style="margin:8px 0 0">See your upcoming and past lab requests.</p></div><button class="btn" onclick="openBook()">${ic("plus")}New booking</button></div>
+  <div class="tabs">${["all","draft","pending","approved","completed","rejected","cancelled"].map(t=>`<button class="${t===tab?"on":""}" onclick="tab='${t}';rBook()">${t[0].toUpperCase()+t.slice(1)}</button>`).join("")}</div>
+  <div class="card">${bTable(rows,true)}</div>`}
+function approve(id){bookings.find(b=>b.id===id).status="approved";toast("Booking approved");rBook()}
+function cancelBooking(id){const i=bookings.findIndex(b=>b.id===id);bookings.splice(i,1);toast("Booking cancelled");checkWaitlist();go(page)}
+
+/* ---------- FIND A LAB ---------- */
+function rFind(){
+  $("main").innerHTML=`<div class="eb">Explore spaces</div><div class="head"><div><h1>Find a lab</h1><p class="sub" style="margin:8px 0 0">Choose a time and find a space that fits your project.</p></div></div>
+  <div class="card"><input id="fq" placeholder="Search labs, equipment or facilities" value="${F.q}" oninput="F.q=this.value;fRes()" style="margin-bottom:16px">
+  <div class="filters"><div><label>Date</label><input type="date" value="${F.date}" onchange="F.date=this.value;fRes()"></div>
+  <div><label>Start time</label><select onchange="F.start=+this.value;fRes()">${hours(F.start)}</select></div>
+  <div><label>End time</label><select onchange="F.end=+this.value;fRes()">${hours(F.end)}</select></div>
+  <div><label>People</label><input type="number" min="1" value="${F.people}" onchange="F.people=+this.value||1;fRes()"></div>
+  <div><label>Department</label><select onchange="F.dept=this.value;fRes()"><option value="">All departments</option>${["Electrical Engineering","Computer Science"].map(d=>`<option ${F.dept===d?"selected":""}>${d}</option>`).join("")}</select></div>
+  <div><label>Equipment</label><select onchange="F.item=this.value;if(F.item&&!F.qty)F.qty=1;fRes()">${itemOpts(F.item)}</select></div>
+  <div><label>Quantity needed</label><input type="number" min="0" value="${F.qty}" onchange="F.qty=+this.value||0;fRes()"></div></div>
+  <label style="display:flex;gap:8px;align-items:center;margin-top:18px"><input type="checkbox" style="width:auto" ${F.only?"checked":""} onchange="F.only=this.checked;fRes()">Show available labs only</label></div>
+  <div id="fres"></div>`;fRes()}
+function fRes(){
+  let r=labs.map(l=>{const p=findProblems(l.id,F.date,F.start,F.end,F.people,F.item,F.qty);return{l,p,ok:!p.length,score:p.length?0:matchScore(l,F.people),use:Math.min(100,Math.round(busyPeople(l.id,F.date,F.start,F.end)/l.capacity*100))}});
+  const q=F.q.toLowerCase();
+  r=r.filter(x=>(!F.dept||x.l.dept===F.dept)&&(!q||(x.l.name+x.l.dept+eqText(x.l)).toLowerCase().includes(q))&&(!F.only||x.ok));
+  const rec=r.filter(x=>x.ok).sort((a,b)=>b.score-a.score).slice(0,3);
+  $("fres").innerHTML=`<div class="sec"><div><div class="eb" style="margin-bottom:4px">Smart lab match</div><h2>Recommended for you</h2></div><small style="color:var(--mut)">Based on your search</small></div>
+  ${rec.length?`<div class="grid3">${rec.map(x=>`<div class="card rec" onclick="openBook(${x.l.id})"><div class="top"><span class="ic">${ic("flask")}</span>${x.score}% match</div><h3 style="font-size:17px;margin-top:14px">${x.l.name}</h3><small style="color:var(--mut)">${eqText(x.l)} · ${x.l.capacity} seats</small><div class="bar"><i style="width:${x.score}%"></i></div><div style="display:flex;justify-content:space-between;color:var(--mut)"><small>Available · ${x.use}% in use</small><span style="color:var(--g)">${ic("arr")}</span></div></div>`).join("")}</div>`:`<div class="card" style="color:var(--mut)">No lab is free for this request. Try another time or date, or join a waitlist below.</div>`}
+  <div class="sec"><div><div class="eb" style="margin-bottom:4px">All spaces</div><h2>Labs <small>(${r.length})</small></h2></div></div>
+  ${r.map(x=>`<div class="card lab"><div class="ic" style="width:64px;height:64px">${ic("flask")}</div><div><h3>${x.l.name}</h3>${x.ok?'<span class="pill">Available</span>':'<span class="pill or">Busy</span>'}<p>${x.l.dept} · ${x.l.loc}</p><div class="meta" style="margin:0"><span>${ic("users")}${x.l.capacity} seats</span><span>${ic("box")}${eqText(x.l)}</span></div>${x.ok?"":`<small style="color:var(--or);display:block;margin-top:8px">${x.p[0]}</small>`}</div>
+  ${x.ok?`<button class="btn o" onclick="openBook(${x.l.id})">Book lab ${ic("arr")}</button>`:`<button class="btn o" onclick="joinFrom(${x.l.id})">Join Smart Waitlist ${ic("arr")}</button>`}</div>`).join("")}`}
+function joinFrom(id){lastRequest={lab:id,date:F.date,start:F.start,end:F.end,people:F.people,item:F.item,qty:F.qty};joinWaitlist(true)}
+
+/* ---------- BOOKING MODAL + CONFLICT DETECTOR ---------- */
+function openBook(id){
+  const lab=id||F.lab||1;
+  $("mbody").innerHTML=`<h2>Book a lab</h2><p class="sub" style="margin:0 0 6px">We'll check for conflicts before you confirm.</p>
+  <div class="fg"><div style="grid-column:1/3"><label>Lab</label><select id="cLab">${labs.map(l=>`<option value="${l.id}" ${l.id===lab?"selected":""}>${l.name}</option>`).join("")}</select></div>
+  <div><label>Date</label><input type="date" id="cDate" value="${F.date}"></div><div><label>People</label><input type="number" id="cPeople" min="1" value="${F.people}"></div>
+  <div><label>Start</label><select id="cStart">${hours(F.start)}</select></div><div><label>End</label><select id="cEnd">${hours(F.end)}</select></div>
+  <div><label>Equipment</label><select id="cItem">${itemOpts(F.item).replace("Any equipment","None")}</select></div><div><label>Quantity</label><input type="number" id="cQty" min="0" value="${F.qty}"></div>
+  <div style="grid-column:1/3"><label>Purpose</label><input id="cPurpose" placeholder="e.g. IoT prototype development"></div></div>
+  <div style="display:flex;gap:10px;margin-top:20px"><button class="btn" onclick="checkBooking()">Check &amp; book</button><button class="btn o" onclick="saveDraft()">Save as draft</button><button class="btn o" onclick="closeModal()">Close</button></div><div id="cResult"></div>`;
+  $("modal").classList.remove("hide")}
+function closeModal(){stopScan();$("modal").classList.add("hide")}
+function checkBooking(){
+  const g=i=>$(i).value;const labId=+g("cLab"),date=g("cDate"),start=+g("cStart"),end=+g("cEnd"),people=+g("cPeople"),item=g("cItem"),qty=+g("cQty");
+  const out=$("cResult"),problems=findProblems(labId,date,start,end,people,item,qty);
+  if(!problems.length){pending={id:"BK-"+(nextId++),lab:labId,date,start,end,people,items:item?{[item]:qty}:{},purpose:g("cPurpose")||"Lab session",status:user.role==="Faculty"?"approved":"pending",mine:true,prio:user.role==="Faculty"};
+    out.innerHTML=`<div class="res ok"><b>No conflict. This slot is available.</b></div><button class="btn" style="margin-top:14px" onclick="confirmBooking()">Confirm booking</button>`;return}
+  let h=`<div class="res bad"><b style="color:var(--rd)">Booking conflict detected</b><ul>${problems.map(p=>`<li>${p}</li>`).join("")}</ul><b>Suggestions</b><ul>`;
+  const dur=end-start;let found=0;
+  for(let s=8;s+dur<=18&&found<3&&dur>0;s++)if(s!==start&&!findProblems(labId,date,s,s+dur,people,item,qty).length){h+=`<li>Same lab, other time: <b>${fh(s)} – ${fh(s+dur)}</b></li>`;found++}
+  labs.forEach(l=>{if(l.id!==labId&&!findProblems(l.id,date,start,end,people,item,qty).length)h+=`<li>Another lab, same time: <b>${l.name}</b></li>`});
+  h+=`<li>Or choose another date</li></ul></div>`;
+  lastRequest={lab:labId,date,start,end,people,item,qty};
+  out.innerHTML=h+`<button class="btn o" style="margin-top:14px" onclick="joinWaitlist()">${ic("bell")}Join waitlist for this slot</button>`}
+function confirmBooking(){bookings.push(pending);notes.unshift({ic:"check",t:"Booking requested",m:`${labName(pending.lab)} on ${fd(pending.date)}, ${fh(pending.start)}–${fh(pending.end)} ${pending.status==="approved"?"was auto-approved (faculty priority).":"is awaiting approval."}`,w:"Just now",n:true});
+  closeModal();toast(pending.status==="approved"?"Faculty priority: booking auto-approved.":"Booking submitted. Status: pending approval.");go(page==="find"?"bookings":page)}
+function joinWaitlist(quiet){waitlist.push(lastRequest);
+  notes.unshift({ic:"clock",t:"Added to waitlist",m:`${labName(lastRequest.lab)}, ${fh(lastRequest.start)}–${fh(lastRequest.end)}. We'll alert you if it frees up.`,w:"Just now",n:true});
+  closeModal();toast("You're on the waitlist. We'll notify you if this slot frees up.");go("dashboard")}
+
+/* ---------- NOTIFICATIONS + PROFILE ---------- */
+function rNotes(){
+  $("main").innerHTML=`<div class="head"><div><div class="eb">Updates</div><h1>Notifications</h1><p class="sub" style="margin:8px 0 0">Important updates about your lab sessions.</p></div><button class="btn o" onclick="notes.forEach(n=>n.n=false);go('notes')">Mark all as read</button></div>
+  <div class="card">${notes.map(n=>`<div class="note ${n.n?"new":""}"><div class="ic">${ic(n.ic)}</div><div><b>${n.t}</b><br><span style="color:var(--mut)">${n.m}</span><br><small>${n.w}</small></div></div>`).join("")}</div>`}
+function rProf(){
+  $("main").innerHTML=`<div class="eb">Your account</div><div class="head"><div><h1>Profile</h1><p class="sub" style="margin:8px 0 0">Your university account details.</p></div></div>
+  <div class="card" style="max-width:760px"><div class="av" style="width:76px;height:76px;font-size:22px">${user.ini}</div><h2 style="font-size:26px;margin-top:12px">${user.name}</h2><span style="color:var(--mut)">${user.role}</span><div style="margin-top:26px">
+  ${[["Email",user.email],["Department",user.dept],["University ID",user.uid]].map(([a,b])=>`<div class="prow"><span>${a}</span><b>${b}</b></div>`).join("")}</div></div>`}
+/* ===== NEW FEATURES ===== */
+const RULES={maxHours:4,maxQty:15,advanceDays:14,maxLate:2};
+let lateReturns=0;
+const live=b=>!["completed","cancelled","rejected","draft"].includes(b.status);
+const valid=b=>!["cancelled","rejected","draft"].includes(b.status);
+bookings.push({id:"BK-2015",lab:4,date:dstr(-2),start:10,end:12,people:10,items:{FPGA:5},purpose:"Research prototype",status:"in_use",mine:false});
+const issues=[
+ {id:"IS-1",bk:"BK-2032",lab:2,item:"Oscilloscope",qty:6,due:dstr(-3),returned:dstr(-3),cond:"Good",dmg:0},
+ {id:"IS-2",bk:"BK-2015",lab:4,item:"FPGA",qty:5,due:dstr(-1),returned:null,cond:"",dmg:0}];
+const log=[],faulty={},eqMaint={};
+notes.push({ic:"clock",t:"Equipment return approaching",m:"Return Arduino Kits at the end of your session.",w:"Today",n:false},{ic:"bell",t:"Equipment overdue",m:"5 FPGA boards from BK-2015 are overdue.",w:"Today",n:true});
+const isLate=i=>!i.returned&&i.due<today;
+const prio=b=>b.prio||/exam|research|class|thesis/i.test(b.purpose)?"High":"Normal";
+const eqStr=b=>Object.entries(b.items).map(([k,v])=>v+" × "+k).join(", ")||"—";
+const tbl=(h,r,e="Nothing here yet.")=>r.length?`<div style="overflow-x:auto"><table><tr>${h.map(x=>`<th>${x}</th>`).join("")}</tr>${r.map(x=>`<tr>${x.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</table></div>`:`<p class="sub" style="margin:0">${e}</p>`;
+const bl=(o,u="")=>{const e=Object.entries(o),m=Math.max(1,...e.map(x=>x[1]));return e.length?e.map(([k,v])=>`<div style="margin:9px 0"><b>${k}</b> <span style="color:var(--mut)">– ${v}${u}</span><div class="bar"><i style="width:${v/m*100}%"></i></div></div>`).join(""):`<span style="color:var(--mut)">No data yet.</span>`};
+const cnt=(a,f)=>a.reduce((o,x)=>{const k=f(x);if(k!==undefined)o[k]=(o[k]||0)+1;return o},{});
+const hd=(eb,t,s)=>`<div class="head"><div><div class="eb">${eb}</div><h1>${t}</h1><p class="sub" style="margin:8px 0 0">${s}</p></div></div>`;
+
+/* cancel / approve / reject with history + notifications */
+function cancelBooking(id){const b=bookings.find(x=>x.id===id);b.status="cancelled";
+  notes.unshift({ic:"bell",t:"Booking cancelled",m:`${labName(b.lab)} on ${fd(b.date)} was cancelled.`,w:"Just now",n:true});toast("Booking cancelled");checkWaitlist();go(page)}
+function approve(id){decide(id,"approved")}
+function decide(id,a){const b=bookings.find(x=>x.id===id);let why="";
+  if(a==="approved")why="Slot and equipment reserved. Please confirm in My Bookings.";if(a==="rejected")why=prompt("Reason for rejection?","Slot reserved for a scheduled class")||"No reason given";
+  b.status=a;b.reason=why;log.unshift({id,lab:labName(b.lab),a,why,by:user.name,w:new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})});
+  notes.unshift({ic:a==="approved"?"check":"bell",t:"Booking "+a,m:`${labName(b.lab)}, ${fd(b.date)}${why?" – "+why:""}`,w:"Just now",n:true});
+  toast("Booking "+a);if(a==="rejected")checkWaitlist();go(page)}
+
+/* staff: requests + approval history */
+function rReq(){const p=bookings.filter(b=>b.status==="pending").sort((a,b)=>(prio(b)==="High")-(prio(a)==="High"));
+  $("main").innerHTML=hd("Staff","Booking requests","Review pending requests. Urgent academic or research bookings are flagged High priority.")+
+  `<div class="card">${tbl(["LAB / PURPOSE","DATE & TIME","PEOPLE","EQUIPMENT","PRIORITY",""],p.map(b=>[`<b>${labName(b.lab)}</b><small>${b.purpose} · ${b.id}</small>`,`${fd(b.date)}<small>${fh(b.start)} – ${fh(b.end)}</small>`,b.people,eqStr(b),`<span class="pill ${prio(b)==="High"?"rd":"bl"}">${prio(b)}</span>`,`<button class="btn sm" onclick="decide('${b.id}','approved')">Approve</button> <button class="btn o sm" onclick="decide('${b.id}','rejected')">Reject</button>`]),"No pending requests.")}</div>
+  <div class="sec"><h2>Approval history</h2></div><div class="card">${tbl(["BOOKING","LAB","DECISION","REASON","BY","TIME"],log.map(l=>[l.id,l.lab,pill(l.a),l.why||"—",l.by,l.w]),"No decisions recorded yet.")}</div>`}
+
+/* equipment inventory */
+function inv(){const r=[];labs.forEach(l=>Object.entries(l.equipment).forEach(([it,tot])=>{const k=l.id+"|"+it;
+  const inUse=issues.filter(i=>!i.returned&&i.lab===l.id&&i.item===it).reduce((s,i)=>s+i.qty,0);
+  const res=bookings.filter(b=>b.lab===l.id&&live(b)&&b.date>=today&&b.items[it]&&!issues.some(i=>i.bk===b.id&&i.item===it)).reduce((s,b)=>s+b.items[it],0);
+  const bad=faulty[k]||0;r.push({l,it,k,tot,inUse,res,bad,m:eqMaint[k],av:eqMaint[k]?0:Math.max(0,tot-inUse-res-bad)})}));return r}
+function rEq(){const st=user.role==="Staff / Admin";
+  $("main").innerHTML=hd("Inventory","Equipment","Live quantities across all labs: total, reserved, in use and available.")+
+  `<div class="card">${tbl(["EQUIPMENT","LAB","TOTAL","RESERVED","IN USE","DAMAGED","AVAILABLE","STATUS"].concat(st?[""]:[]),inv().map(r=>[`<b>${r.it}</b>`,r.l.name,r.tot,r.res,r.inUse,r.bad,`<b>${r.av}</b>`,r.m?'<span class="pill bl">Maintenance</span>':r.av?'<span class="pill">Available</span>':'<span class="pill rd">Unavailable</span>'].concat(st?[`<button class="btn o sm" onclick="eqMaint['${r.k}']=!eqMaint['${r.k}'];rEq()">${r.m?"Mark ready":"Set maintenance"}</button>`]:[])))}</div>`}
+
+/* issue + return */
+function rIssue(){const ready=bookings.filter(b=>["approved","reserved"].includes(b.status)&&!issues.some(i=>i.bk===b.id));
+  $("main").innerHTML=hd("Equipment desk","Issue & return","Hand out approved equipment and confirm returns with condition.")+
+  `<div class="card"><h2 style="font-size:20px;margin-bottom:12px">Ready to issue</h2>${tbl(["BOOKING","EQUIPMENT","DATE",""],ready.map(b=>[`<b>${labName(b.lab)}</b><small>${b.id}</small>`,eqStr(b),fd(b.date),`<button class="btn sm" onclick="issueEq('${b.id}')">${Object.keys(b.items).length?"Issue":"Grant access"}</button>`]),"No approved bookings waiting.")}</div>
+  <div class="card" style="margin-top:18px"><h2 style="font-size:20px;margin-bottom:12px">Issue &amp; return log</h2>${tbl(["ID","EQUIPMENT","LAB","DUE","RETURNED","CONDITION","STATUS"],issues.map(i=>[i.id,`${i.qty} × ${i.item}`,labName(i.lab),fd(i.due),i.returned?fd(i.returned):"—",i.returned?`${i.cond}${i.dmg?" ("+i.dmg+")":""}${i.photo?" 📷 "+i.photo:""}`:"—",i.returned?`<span class="pill ${i.late?"rd":"bl"}">${i.late?"Returned late":"Returned"}</span>`:isLate(i)?`<span class="pill rd">Overdue</span> <button class="btn sm" onclick="openReturn('${i.id}')">Return</button>`:`<span class="pill or">Issued</span> <button class="btn sm" onclick="openReturn('${i.id}')">Return</button>`]))}</div>`}
+function issueEq(id){const b=bookings.find(x=>x.id===id);
+  b.status="in_use";Object.entries(b.items).forEach(([it,q])=>issues.push({id:"IS-"+(issues.length+1),bk:id,lab:b.lab,item:it,qty:q,due:b.date,returned:null,cond:"",dmg:0}));
+  notes.unshift({ic:"box",t:"Equipment issued",m:`${eqStr(b)} issued for ${id}. Due back ${fd(b.date)}.`,w:"Just now",n:true});toast("Equipment issued");rIssue()}
+function openReturn(id){const i=issues.find(x=>x.id===id);
+  $("mbody").innerHTML=`<h2>Confirm return</h2><p class="sub" style="margin:0">${i.qty} × ${i.item} · ${labName(i.lab)}${isLate(i)?' · <b style="color:var(--rd)">LATE</b>':""}</p><div class="fg"><div><label>Condition</label><select id="rC"><option>Good</option><option>Damaged</option><option>Missing</option></select></div><div><label>Units affected</label><input id="rU" type="number" min="0" value="0"></div><div style="grid-column:1/3"><label>Remarks</label><input id="rR"></div><div style="grid-column:1/3"><label>Damage photo (optional)</label><input id="rP" type="file" accept="image/*"></div></div><div style="display:flex;gap:10px;margin-top:20px"><button class="btn" onclick="doReturn('${id}')">Confirm return</button><button class="btn o" onclick="closeModal()">Cancel</button></div>`;$("modal").classList.remove("hide")}
+function doReturn(id){const i=issues.find(x=>x.id===id),c=$("rC").value,u=+$("rU").value||0,f=$("rP").files[0],late=isLate(i);
+  Object.assign(i,{returned:today,cond:c,dmg:c==="Good"?0:u,remarks:$("rR").value,photo:f?f.name:"",late});
+  if(c!=="Good"){const k=i.lab+"|"+i.item;faulty[k]=(faulty[k]||0)+u}
+  if(late){lateReturns++;notes.unshift({ic:"clock",t:"Late return recorded",m:`${i.item} was returned late (${lateReturns}/${RULES.maxLate} before booking restriction).`,w:"Just now",n:true})}
+  const b=bookings.find(x=>x.id===i.bk);if(b&&!issues.some(x=>x.bk===i.bk&&!x.returned)){b.status="completed";b.late=issues.some(x=>x.bk===i.bk&&x.late);b.dmgd=issues.some(x=>x.bk===i.bk&&x.dmg>0)}
+  closeModal();toast("Return confirmed");checkWaitlist();rIssue()}
+
+/* analytics */
+function rAn(){const B=bookings,V=B.filter(valid),c=s=>B.filter(b=>b.status===s).length,n2=x=>String(x).padStart(2,"0");
+  const st=(i,v,l)=>`<div class="card stat"><div class="ic">${ic(i)}</div><b>${n2(v)}</b><span>${l}</span></div>`;
+  const H=Array.from({length:10},(_,i)=>i+8),peak={};H.forEach(h=>peak[fh(h)]=V.filter(b=>h>=b.start&&h<b.end).length);
+  const eq={};V.forEach(b=>Object.entries(b.items).forEach(([k,v])=>eq[k]=(eq[k]||0)+v));
+  const dmg=Object.values(faulty).reduce((a,b)=>a+b,0),topH=Object.entries(peak).sort((a,b)=>b[1]-a[1])[0][0];
+  const bad=Object.entries(faulty).filter(e=>e[1]).map(([k,v])=>k.split("|")[1]+" in "+labName(+k.split("|")[0])+" ("+v+")");
+  const lc=cnt(V,b=>labName(b.lab)),ls=Object.entries(lc).sort((a,b)=>a[1]-b[1]);
+  const heat=labs.map(l=>`<tr><td><b>${l.name}</b></td>${H.map(h=>{const n=V.filter(b=>b.lab===l.id&&h>=b.start&&h<b.end).length;return`<td style="background:rgba(33,94,79,${Math.min(1,n*.3)});color:${n>2?"#fff":"inherit"};text-align:center;padding:8px">${n||""}</td>`}).join("")}</tr>`).join("");
+  $("main").innerHTML=hd("Insights","Analytics","Usage across labs, equipment and departments.")+
+  `<div class="stats">${st("cal",B.length,"Total bookings")}${st("check",c("approved"),"Approved")}${st("clock",c("pending"),"Pending")}${st("out",c("cancelled"),"Cancelled")}${st("out",c("rejected"),"Rejected")}${st("box",issues.filter(i=>!i.returned).length,"Equipment issued")}${st("bell",issues.filter(isLate).length,"Overdue equipment")}${st("box",dmg,"Damaged / missing units")}</div>
+  <div class="card" style="margin-bottom:18px"><div class="eb">Smart insights</div><ul style="margin:0;padding-left:18px;line-height:1.8"><li><b>Usage prediction:</b> demand is highest around ${topH}; expect heavy booking in that window.</li><li><b>Maintenance recommendation:</b> ${bad.length?bad.join(", ")+" reported faulty – schedule servicing.":"no equipment reported faulty."}</li><li><b>Underused lab:</b> ${ls[0]?ls[0][0]:"–"}. Promote it to students as an alternative.</li></ul></div>
+  <div class="row2" style="grid-template-columns:1fr 1fr"><div class="card"><h2 style="font-size:20px">Most-booked labs</h2>${bl(lc," bookings")}</div><div class="card"><h2 style="font-size:20px">Most-used equipment</h2>${bl(eq," units")}</div>
+  <div class="card"><h2 style="font-size:20px">Usage by department</h2>${bl(cnt(V,b=>labById(b.lab).dept)," bookings")}</div><div class="card"><h2 style="font-size:20px">Peak booking hours</h2>${bl(peak)}</div>
+  <div class="card"><h2 style="font-size:20px">Rejection reasons</h2>${bl(cnt(B.filter(b=>b.status==="rejected"),b=>b.reason))}</div></div>
+  <div class="card" style="margin-top:18px"><h2 style="font-size:20px;margin-bottom:10px">Usage heatmap (bookings per hour)</h2><div style="overflow-x:auto"><table><tr><th>LAB</th>${H.map(h=>`<th style="text-align:center">${h%12||12}${h<12?"a":"p"}</th>`).join("")}</tr>${heat}</table></div></div>`}
+
+/* labs + rules */
+function rLabs(){const blk=l=>maintenance.some(m=>m.lab===l.id&&m.full);
+  $("main").innerHTML=hd("Administration","Labs & rules","Block labs temporarily and set university booking rules.")+
+  `<div class="card">${tbl(["LAB","DEPARTMENT","CAPACITY","STATUS",""],labs.map(l=>[`<b>${l.name}</b>`,l.dept,l.capacity,blk(l)?'<span class="pill bl">Maintenance</span>':'<span class="pill">Available</span>',`<button class="btn o sm" onclick="blockLab(${l.id})">${blk(l)?"Unblock":"Block for today"}</button>`]))}</div>
+  <div class="sec"><h2>Booking rules</h2></div><div class="card"><div class="filters">${[["maxHours","Max booking duration (hours)"],["maxQty","Max equipment quantity"],["advanceDays","Advance booking limit (days)"],["maxLate","Late returns before restriction"]].map(([k,t])=>`<div><label>${t}</label><input type="number" min="1" value="${RULES[k]}" onchange="RULES.${k}=+this.value;toast('Rule updated')"></div>`).join("")}</div></div>`}
+function blockLab(id){const i=maintenance.findIndex(m=>m.lab===id&&m.full);if(i>-1){maintenance.splice(i,1);checkWaitlist()}else maintenance.push({lab:id,date:today,start:8,end:18,full:true});rLabs()}
+/* ===== ROUND 2: Faculty, QR, ID scan, calendar, push/email ===== */
+users.faculty={name:"Jordan Lee",ini:"JL",role:"Faculty",email:"j.lee@northfield.edu",dept:"Electrical Engineering",uid:"FAC-20311"};
+function qr(el,text){if(typeof QRCode==="undefined"){el.innerHTML=`<code>${text}</code>`;return}new QRCode(el,{text,width:180,height:180})}
+
+/* QR pass + calendar */
+function openPass(id){const b=bookings.find(x=>x.id===id),d=b.date.replace(/-/g,""),p=h=>String(h).padStart(2,"0");
+  const g=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(labName(b.lab)+" – "+b.purpose)}&dates=${d}T${p(b.start)}0000/${d}T${p(b.end)}0000&location=${encodeURIComponent(labById(b.lab).loc)}`;
+  $("mbody").innerHTML=`<h2>${labName(b.lab)}</h2><p class="sub" style="margin:0 0 14px">${fd(b.date)} · ${fh(b.start)} – ${fh(b.end)} · ${b.id}</p><div id="qrbox" style="display:grid;place-items:center;padding:14px;background:var(--bg);border-radius:12px"></div><p style="color:var(--mut);text-align:center">Show this QR to lab staff to collect or return equipment.</p><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px"><button class="btn" onclick="ics('${id}')">Download .ics</button><a class="btn o" target="_blank" href="${g}" style="text-decoration:none">Google Calendar</a><button class="btn o" onclick="closeModal()">Close</button></div>`;
+  $("modal").classList.remove("hide");qr($("qrbox"),"LABSPACE|"+id)}
+function ics(id){const b=bookings.find(x=>x.id===id),d=b.date.replace(/-/g,""),p=h=>String(h).padStart(2,"0");
+  const t=`BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nUID:${id}@labspace\nSUMMARY:${labName(b.lab)} – ${b.purpose}\nLOCATION:${labById(b.lab).loc}\nDTSTART:${d}T${p(b.start)}0000\nDTEND:${d}T${p(b.end)}0000\nEND:VEVENT\nEND:VCALENDAR`;
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:"text/calendar"}));a.download=id+".ics";a.click()}
+
+/* scanner: booking QR + student ID (camera via BarcodeDetector, manual fallback) */
+let stream=null;
+function stopScan(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
+function openScan(mode){
+  $("mbody").innerHTML=`<h2>${mode==="id"?"Scan student ID":"Scan booking QR"}</h2><p class="sub" style="margin:0 0 10px">Point the camera at the code, or type it below.</p><video id="sv" playsinline muted style="width:100%;border-radius:12px;background:#10241d;max-height:260px"></video><div style="display:flex;gap:10px;margin-top:14px"><input id="sc" placeholder="${mode==="id"?"STU-20241082":"BK-2048"}"><button class="btn" onclick="handleCode($('sc').value)">Submit</button></div><div style="margin-top:14px"><button class="btn o" onclick="closeModal()">Close</button></div>`;
+  $("modal").classList.remove("hide");startScan()}
+async function startScan(){try{if(!("BarcodeDetector" in window))throw 0;const d=new BarcodeDetector({formats:["qr_code","code_128"]});
+  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});const v=$("sv");v.srcObject=stream;await v.play();
+  const tick=async()=>{if(!stream)return;try{const r=await d.detect(v);if(r[0]){handleCode(r[0].rawValue);return}}catch(e){}setTimeout(tick,300)};tick()}
+  catch(e){const v=$("sv");if(v)v.outerHTML='<p class="sub" style="margin:0 0 10px">Camera scanning is not available in this browser or was blocked. Type the code instead.</p>'}}
+function handleCode(raw){const code=(raw||"").trim().toUpperCase().split("|").pop();stopScan();closeModal();
+  if(/^(STU|STF|FAC)-/.test(code)){const u=Object.values(users).find(x=>x.uid===code);if(!u)return toast("ID not recognised: "+code);
+    const r=bookings.filter(b=>b.mine&&["approved","reserved"].includes(b.status)&&!issues.some(i=>i.bk===b.id));
+    toast(`✔ ${u.name} (${u.role}, ${u.dept}) verified · ${r.length} booking(s) ready to issue`);return go("issue")}
+  const b=bookings.find(x=>x.id===code);if(!b)return toast("Code not recognised: "+code);
+  const open=issues.find(i=>i.bk===code&&!i.returned);if(open)return openReturn(open.id);
+  if(!["approved","reserved"].includes(b.status))return toast(`${code} is ${b.status}, so it cannot be issued.`);
+  
+  issueEq(code);toast(`QR checkout: ${eqStr(b)} issued for ${code}`)}
+const _ri=rIssue;rIssue=function(){_ri();$("main").querySelector(".head").insertAdjacentHTML("afterend",`<div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap"><button class="btn" onclick="openScan('qr')">${ic("box")}Scan booking QR</button><button class="btn o" onclick="openScan('id')">${ic("user")}Scan student ID</button></div>`)};
+const _rp=rProf;rProf=function(){_rp();$("main").insertAdjacentHTML("beforeend",`<div class="card" style="max-width:760px;margin-top:18px"><h2 style="font-size:20px;margin-bottom:6px">Digital ID</h2><p class="sub" style="margin:0 0 14px">Staff can scan this to verify you at the equipment desk.</p><div id="idqr"></div><b style="display:block;margin-top:8px">${user.uid}</b></div>`);qr($("idqr"),user.uid)};
+
+/* push + email notifications */
+function pushOut(n){try{if("Notification" in window&&Notification.permission==="granted")new Notification(n.t,{body:n.m})}catch(e){}}
+const _nu=notes.unshift.bind(notes);notes.unshift=(...a)=>{a.forEach(pushOut);return _nu(...a)};
+function enablePush(){if(!("Notification" in window))return toast("This browser does not support notifications.");
+  Notification.requestPermission().then(p=>{toast(p==="granted"?"Browser push notifications enabled":"Notifications were blocked in browser settings");if(p==="granted")new Notification("Labspace",{body:"Push notifications are on."});rNotes()})}
+rNotes=function(){const on="Notification" in window&&Notification.permission==="granted";
+  $("main").innerHTML=`<div class="head"><div><div class="eb">Updates</div><h1>Notifications</h1><p class="sub" style="margin:8px 0 0">Important updates about your lab sessions.</p></div><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn o" onclick="enablePush()">${on?"Push enabled ✓":"Enable push alerts"}</button><button class="btn o" onclick="notes.forEach(n=>n.n=false);go('notes')">Mark all as read</button></div></div>
+  <div class="card">${notes.map(n=>`<div class="note ${n.n?"new":""}"><div class="ic">${ic(n.ic)}</div><div style="flex:1"><b>${n.t}</b><br><span style="color:var(--mut)">${n.m}</span><br><small>${n.w}</small></div><a class="link" style="text-decoration:none" href="mailto:${user.email}?subject=${encodeURIComponent("Labspace: "+n.t)}&body=${encodeURIComponent(n.m)}">Email me</a></div>`).join("")}</div>`};
+/* ===== ROUND 3: Section 3 lifecycle: Draft > Pending > Approved > Reserved > In Use > Completed ===== */
+const SL={draft:"Draft",pending:"Pending Approval",approved:"Approved",reserved:"Reserved",in_use:"In Use",completed:"Completed",rejected:"Rejected",cancelled:"Cancelled"};
+function pillB(b){let t=SL[b.status],c={draft:"bl",pending:"or",approved:"",reserved:"",in_use:"or",completed:"bl",rejected:"rd",cancelled:"rd"}[b.status];
+  if(b.status==="in_use"&&issues.some(i=>i.bk===b.id&&isLate(i))){t="Overdue";c="rd"}
+  return `<span class="pill ${c}">${t}</span>`+(b.late?` <span class="pill rd">Returned Late</span>`:"")+(b.dmgd?` <span class="pill rd">Damaged</span>`:"")}
+function setSt(id,s){const b=bookings.find(x=>x.id===id),m={reserved:["check","Reservation confirmed","Your slot and equipment are held for "+labName(b.lab)+"."],pending:["clock","Booking submitted",labName(b.lab)+" request is awaiting approval."],completed:["check","Booking completed",labName(b.lab)+" session is marked complete."]}[s];
+  b.status=s;notes.unshift({ic:m[0],t:m[1],m:m[2],w:"Just now",n:true});toast(m[1]);go(page)}
+function saveDraft(){const g=i=>$(i).value,item=g("cItem"),qty=+g("cQty");
+  bookings.push({id:"BK-"+(nextId++),lab:+g("cLab"),date:g("cDate"),start:+g("cStart"),end:+g("cEnd"),people:+g("cPeople"),items:item?{[item]:qty}:{},purpose:g("cPurpose")||"Lab session",status:"draft",mine:true});
+  closeModal();toast("Saved as draft. Submit it from My Bookings when ready.");go(page==="find"?"bookings":page)}
+const _ri2=rIssue;rIssue=function(){_ri2();const u=bookings.filter(b=>b.status==="in_use"&&!issues.some(i=>i.bk===b.id));
+  if(u.length)$("main").insertAdjacentHTML("beforeend",`<div class="card" style="margin-top:18px"><h2 style="font-size:20px;margin-bottom:12px">Lab sessions in progress</h2>${tbl(["BOOKING","DATE & TIME",""],u.map(b=>[`<b>${labName(b.lab)}</b><small>${b.id} · ${b.purpose}</small>`,`${fd(b.date)}<small>${fh(b.start)} – ${fh(b.end)}</small>`,`<button class="btn sm" onclick="setSt('${b.id}','completed')">Mark complete</button>`]))}</div>`)};
+/* ===== ROUND 4: real login form ===== */
+function loginForm(){const e=$("lEmail").value.trim().toLowerCase(),pw=$("lPass").value;
+  if(!e||!pw)return toast("Enter your email and password.");
+  const key=Object.keys(users).find(k=>users[k].email===e)||(e==="student@uni.edu"?"student":null);
+  if(key)return signIn(key);
+  const role=/staff|admin/.test(e)?"Staff / Admin":/faculty|prof/.test(e)?"Faculty":"Student";
+  const name=e.split("@")[0].split(/[._-]/).filter(Boolean).map(w=>w[0].toUpperCase()+w.slice(1)).join(" ")||"User";
+  users.custom={name,ini:name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase(),role,email:e,dept:"Computer Science",uid:(role==="Student"?"STU-":role==="Faculty"?"FAC-":"STF-")+(10000+e.length*7919%90000)};
+  signIn("custom")}
+const _si=signIn;signIn=function(r){if(r!=="custom")$("lEmail").value=users[r].email;_si(r)};
+/* ===== ROUND 5: Supabase sign in / sign up ===== */
+const SUPABASE_URL="",SUPABASE_KEY="";   // paste from Supabase > Project Settings > API (Project URL + anon public key)
+const sb=(SUPABASE_URL&&window.supabase)?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
+let authMode="in";
+function setMode(){authMode=authMode==="in"?"up":"in";const up=authMode==="up";$("suF").classList.toggle("hide",!up);
+  $("lh").textContent=up?"Create account":"Welcome back";$("lbtn").textContent=up?"Sign up":"Sign in";
+  $("swTxt").textContent=up?"Already have an account?":"New here?";$("swLn").textContent=up?"Sign in":"Create an account"}
+const ROLES={student:"Student",faculty:"Faculty",staff:"Staff / Admin"};
+function toUser(p,email){const n=p.name||email.split("@")[0];return{name:n,ini:n.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase(),role:ROLES[p.role]||"Student",email,dept:p.department||"Computer Science",uid:p.university_id||"—"}}
+async function enter(u){const{data:p}=await sb.from("profiles").select("*").eq("id",u.id).single();users.custom=toUser(p||{},u.email);signIn("custom")}
+async function authSubmit(){const e=$("lEmail").value.trim().toLowerCase(),pw=$("lPass").value;
+  if(!e||!pw)return toast("Enter your email and password.");
+  if(authMode==="up"&&!$("lName").value.trim())return toast("Enter your full name.");
+  if(authMode==="up"&&pw.length<6)return toast("Password must be at least 6 characters.");
+  if(!sb){if(authMode==="up")users.custom=null;return loginForm()}   // demo mode until Supabase keys are added
+  try{
+    if(authMode==="up"){const{data,error}=await sb.auth.signUp({email:e,password:pw,options:{data:{name:$("lName").value.trim(),role:$("lRole").value}}});
+      if(error)return toast(error.message);
+      if(!data.session){setMode();return toast("Account created. Check your email to confirm it, then sign in.")}
+      return await enter(data.user)}
+    const{data,error}=await sb.auth.signInWithPassword({email:e,password:pw});
+    if(error)return toast(error.message);await enter(data.user)
+  }catch(x){toast("Could not reach Supabase: "+x.message)}}
+const _so=signOut;signOut=function(){if(sb)sb.auth.signOut();_so()};
+if(sb)sb.auth.getSession().then(({data})=>{if(data.session)enter(data.session.user)});
+</script>
+</body>
+</html>
